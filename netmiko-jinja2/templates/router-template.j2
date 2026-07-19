@@ -1,0 +1,34 @@
+conf term
+int lo0
+vrf forwarding control
+ip addr {{ loopback }} 255.255.255.255
+
+router ospf 1 vrf control
+{% if edge %}
+default-information originate always
+{% endif %}
+network {{ loopback }} 0.0.0.0 area 0
+{% for network, wildcard in networks.items() %}
+network {{ network }} {{ wildcard }} area 0
+{% endfor %}
+exit
+
+{% if edge  %}
+int {{ outside }}
+ip ospf shutdown
+ip nat outside
+{% for inside in insides %}
+int {{ inside }}
+ip nat inside
+{% endfor %}
+exit
+access-list 10 permit {{ allowed_net }} {{ allowed_mask }}
+ip nat inside source list 10 interface {{ outside }} vrf control overload
+{% endif %}
+
+{% for permit,wildcard in permits.items() %}
+access-list 20 permit {{permit}} {{wildcard}}
+{% endfor %}
+
+line vty 0 4
+access-class 20 in

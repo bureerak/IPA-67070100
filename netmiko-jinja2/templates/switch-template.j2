@@ -1,0 +1,10 @@
+conf term
+int vlan {{ vlan }}
+
+{% for intf in interface %}
+int {{ intf }}
+switchport access vlan {{ vlan }}
+{% endfor %}
+
+int vlan {{ vlan }}
+no shut
