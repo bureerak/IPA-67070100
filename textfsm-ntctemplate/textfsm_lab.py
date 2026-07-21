@@ -9,6 +9,7 @@ DEVICES:dict[str,str] = {
 def main(devices:dict[str,str], user:str) -> None :
 
     for host, ip in devices.items() :
+
         CONNECT_DATA = {
             'device_type': 'cisco_ios',
             'host': ip,
@@ -22,7 +23,8 @@ def main(devices:dict[str,str], user:str) -> None :
         net_connect = ConnectHandler(**CONNECT_DATA)
         net_connect.enable()
         result1 = net_connect.send_command("show cdp neighbor", use_textfsm=True)
-
+        print(*result1, sep="\n")
+        
         if host == "S1":
             print("+--- S1 Description. ---+")
             parse_cdp_set_description(result1, host, net_connect)
@@ -44,14 +46,15 @@ def parse_cdp_set_description(data, host, net_connect:BaseConnection) -> None:
         desc = "Connected to " + neighbor_int + " of " + d["neighbor_name"][:3]
 
         net_connect.send_config_set([f"int {local_int}", f"description {desc}"])
+
     if host == "R2":
-        net_connect.send_config_set(["int g0/3","description Connect to WAN"])
+        net_connect.send_config_set(["int g0/3","description Connected to WAN"])
 
     elif host == "R1":
-        net_connect.send_config_set(["int g0/1","description Connect to PC"])
+        net_connect.send_config_set(["int g0/1","description Connected to PC"])
 
     elif host == "S1":
-        net_connect.send_config_set(["int g0/2","description Connect to PC"])
+        net_connect.send_config_set(["int g0/2","description Connected to PC"])
 
     return
 
